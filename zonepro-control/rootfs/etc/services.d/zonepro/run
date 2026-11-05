@@ -1,0 +1,31 @@
+#!/usr/bin/with-contenv bashio
+# Starts the same server.js as the standalone version.
+#  - config.json  -> /config (add-on config folder, editable from HA)
+#  - state/backups -> /data
+#  - MQTT broker: add-on options first, else the broker the Supervisor knows
+
+export ZONEPRO_DATA_DIR=/data
+export ZONEPRO_CONFIG_DIR=/config
+
+if bashio::config.has_value 'mqtt_host'; then
+  export ZONEPRO_MQTT_HOST="$(bashio::config 'mqtt_host')"
+  export ZONEPRO_MQTT_PORT="$(bashio::config 'mqtt_port')"
+  if bashio::config.has_value 'mqtt_username'; then
+    export ZONEPRO_MQTT_USER="$(bashio::config 'mqtt_username')"
+  fi
+  if bashio::config.has_value 'mqtt_password'; then
+    export ZONEPRO_MQTT_PASSWORD="$(bashio::config 'mqtt_password')"
+  fi
+  bashio::log.info "MQTT-broker uit add-on opties: ${ZONEPRO_MQTT_HOST}:${ZONEPRO_MQTT_PORT}"
+elif bashio::services.available "mqtt"; then
+  export ZONEPRO_MQTT_HOST="$(bashio::services mqtt host)"
+  export ZONEPRO_MQTT_PORT="$(bashio::services mqtt port)"
+  export ZONEPRO_MQTT_USER="$(bashio::services mqtt username)"
+  export ZONEPRO_MQTT_PASSWORD="$(bashio::services mqtt password)"
+  bashio::log.info "MQTT-broker via Supervisor: ${ZONEPRO_MQTT_HOST}:${ZONEPRO_MQTT_PORT}"
+else
+  bashio::log.warning "Geen MQTT-broker gevonden. Vul mqtt_host in bij de add-on configuratie, of installeer Mosquitto broker."
+fi
+
+cd /app
+exec node server.js

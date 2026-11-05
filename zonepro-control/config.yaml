@@ -1,0 +1,35 @@
+name: ZonePRO Control
+version: "1.0.0"
+slug: zonepro_control
+description: Webbediening (volume, mute, bron) voor een dbx ZonePRO, met MQTT-integratie voor Home Assistant
+url: https://github.com/JOUW-GEBRUIKER/zonepro-control
+arch:
+  - aarch64
+  - amd64
+  - armv7
+init: false
+startup: services
+boot: auto
+services:
+  - mqtt:want
+ingress: true
+ingress_port: 3001
+panel_icon: mdi:speaker-multiple
+panel_title: ZonePRO
+ports:
+  3001/tcp: 3001
+ports_description:
+  3001/tcp: "Losse webinterface (ook bereikbaar buiten Home Assistant om)"
+webui: "http://[HOST]:[PORT:3001]"
+map:
+  - addon_config:rw
+options:
+  mqtt_host: ""
+  mqtt_port: 1883
+  mqtt_username: ""
+  mqtt_password: ""
+schema:
+  mqtt_host: str?
+  mqtt_port: port?
+  mqtt_username: str?
+  mqtt_password: password?
